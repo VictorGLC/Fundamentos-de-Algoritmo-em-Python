@@ -24,4 +24,4 @@ def amplitude(lista: list) -> int:
 
     return maximo - minimo
 
-#print(amplitude([3,5,6,8]))
+print(amplitude([3,5,6,8]))

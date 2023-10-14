@@ -129,7 +129,7 @@ def maior_resultado(resultados: list[Resultado]) -> Resultado:
 
     return maior_resultado
 
-def ordenar_lista(resultados: list[Resultado], provas: list[Prova]) -> list[Resultado]:
+def ordenar_lista(resultados: list[Resultado]) -> list[Resultado]:
     '''
     Retorna uma lista de resultado ordenada pelo maior valor das notas finais
     Exemplo:
@@ -211,4 +211,4 @@ def main():
     for i in range(len(resultados)):
         print(f"{i+1} lugar: Código: {resultados[i].codigo}, Nota: {resultados[i].nota_final}")
 
-#main()
+main()

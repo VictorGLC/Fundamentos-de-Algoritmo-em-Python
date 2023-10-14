@@ -161,20 +161,17 @@ def remover(lista: list, elem) -> list:
 
 def converte_string(respostas: list[str]) -> list[int]:
     '''
-    >>> converte_string(['04', '08', '16', '10', '8'])
-    [4, 8, 16, 10, 8]
+    Modifica uma lista de string por uma lista de inteiros que remove o 0 em unidades
+    como 04, 08, 06, etc.
     '''
-    nv_lst = []
     for i in range(len(respostas)):
         if respostas[i][0] == 0:
-            nv_lst.append(int(respostas[i][1:]))
+            respostas[i] = int(respostas[i][1:])
         else:
-            nv_lst.append(int(respostas[i]))
-
-    return nv_lst
+            respostas[i] = int(respostas[i])
 
 def main():
-    """  
+    """
     provas = [Prova(3211, 80.0, [4, 10, 4, 16, 10]), Prova(7102, 0, [1, 2, 3, 4, 5]), 
     Prova(1234, 90.0, [21, 8, 8, 8, 14]), Prova(5812, 32.0, [20, 0, 8, 16, 1]), Prova(9123, 0, [5, 4, 3, 2, 1])]
     gabarito = [21, 10, 8, 16, 15]
@@ -196,7 +193,8 @@ def main():
             questao: str = input(f"Resposta - Questão {i}: ")
             respostas.append(questao)
 
-        prova = Prova(codigo,redacao, converte_string(respostas))
+        converte_string(respostas)
+        prova = Prova(codigo,redacao, respostas)
         provas.append(prova)
         print("\n")
 
@@ -205,10 +203,10 @@ def main():
         questao: str = input(f"Gabarito - Questão {i}: ")
         gabarito.append(questao)
     
-    resultados = resultado(provas, converte_string(gabarito))
-    print(resultados)
+    converte_string(gabarito)
+    resultados = resultado(provas, gabarito)
     print('O resultado do vestibular foi: \n')
     for i in range(len(resultados)):
         print(f"{i+1} lugar: Código: {resultados[i].codigo}, Nota: {resultados[i].nota_final}")
 
-main()
+#main()

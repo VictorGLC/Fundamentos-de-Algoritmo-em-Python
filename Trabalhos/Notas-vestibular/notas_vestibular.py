@@ -45,6 +45,23 @@ def somatorio_alternativas(s: int) -> list[int]:
         alternativa = alternativa * 2
     return alternativas
 
+def is_somatoria(respostas: list, gabarito: list) -> bool:
+    '''
+    Retorna se a questao é uma somatoria ou nao, ou seja, se tiver assinalado todas as respostas conforme o gabarito, 
+    ou pelo menos uma resposta assinalado correta, porém, sem ter nenhuma alternativa incorreta assinalada
+    Exemplos:
+    >>> is_somatoria([4, 8], [2, 8])
+    False
+    >>> is_somatoria([4, 8, 16], [4, 8, 16])
+    True
+    >>> is_somatoria([4], [4, 8, 16])
+    True
+    '''
+    for i in range(len(respostas)):
+        if respostas[i] not in gabarito:
+            return False
+    return True 
+
 def calcula_respostas(respostas: list[int], gabarito: list[int]) -> float:
     '''
     Recebe uma lista de respostas de somatoria com o gabarito e retorna o valor total dos acertos.
@@ -68,23 +85,6 @@ def calcula_respostas(respostas: list[int], gabarito: list[int]) -> float:
 
     return round(soma_recursiva(notas_acertos) * 100) / 100
 
-def is_somatoria(respostas: list, gabarito: list) -> bool:
-    '''
-    Retorna se a questao é uma somatoria ou nao, ou seja, se tiver assinalado todas as respostas conforme o gabarito, 
-    ou pelo menos uma resposta assinalado correta, porém, sem ter nenhuma alternativa incorreta assinalada
-    Exemplos: 
-    >>> is_somatoria([2], [2, 8])
-    True
-    >>> is_somatoria([4, 8], [2, 8])
-    False
-    >>> is_somatoria([4, 8, 16], [4, 8, 16])
-    True
-    '''
-    for i in range(len(respostas)):
-        if respostas[i] not in gabarito:
-            return False
-    return True 
-
 def soma_recursiva(alternativas: list[int]) -> float:
     '''
     Recebe uma lista de inteiros e retorna a soma destes.
@@ -93,39 +93,10 @@ def soma_recursiva(alternativas: list[int]) -> float:
     >>> soma_recursiva([2.0, 2.0, 2.0, 3.0, 6.0, 1.5, 1.5, 1.5])
     19.5
     '''
-    if not alternativas:
+    if len(alternativas) == 0:
         return 0
     else:
         return alternativas[0] + soma_recursiva(alternativas[1:])
-
-def remove_redacao(provas: list[Prova]) -> list[Prova]:
-    '''
-    Recebe uma lista de provas verificando as redacoes que estao zeradas,
-    retorna todas as provas que a redacao nao tem a nota zero.
-    Exemplo:
-    >>> remove_redacao([Prova('3211', 80.0, [4, 10, 4, 16, 10]), Prova('7102', 0, [1, 2, 3, 4, 5]), Prova('1234', 90.0, [21, 8, 8, 8, 14]), Prova('5812', 32.0, [20, 0, 8, 16, 1]), Prova('9123', 0, [5, 4, 3, 2, 1])])
-    [Prova(codigo='3211', redacao=80.0, respostas=[4, 10, 4, 16, 10]), Prova(codigo='1234', redacao=90.0, respostas=[21, 8, 8, 8, 14]), Prova(codigo='5812', redacao=32.0, respostas=[20, 0, 8, 16, 1])]
-    '''
-    provas_filtradas: list = []
-    for i in range(len(provas)):
-        if provas[i].redacao != 0:
-            provas_filtradas.append(provas[i])
-
-    return provas_filtradas
-
-def tamanhos_iguais(respostas: list[int], gabarito: list[int]) -> bool:
-    '''
-    Verifica se as respostas e o gabarito tem o mesmo tamanho
-    Exemplos:
-    >>> tamanhos_iguais([1, 2, 3, 4], [21, 10, 8, 16, 15])
-    False
-    >>> tamanhos_iguais([1, 2, 3, 4, 5], [21, 10, 8, 16, 15])
-    True
-    '''
-    for i in range(len(respostas)):
-        if len(respostas) != len(gabarito):
-            return False
-    return True
 
 def resultado(provas: list[Prova], gabarito: list) -> list[Resultado]:
     '''
@@ -136,11 +107,10 @@ def resultado(provas: list[Prova], gabarito: list) -> list[Resultado]:
     '''
     resultado: list = []
 
-    provas_filtradas: list = remove_redacao(provas)
-    for i in range(len(provas_filtradas)):
-        if tamanhos_iguais(provas[i].respostas, gabarito):
-            nota_final: float = provas_filtradas[i].redacao + calcula_respostas(provas_filtradas[i].respostas, gabarito)
-            resultado.append(Resultado(provas_filtradas[i].codigo, nota_final))
+    for i in range(len(provas)):
+        if len(provas[i].respostas) == len(gabarito) and provas[i].redacao > 0:
+            nota_final: float = provas[i].redacao + calcula_respostas(provas[i].respostas, gabarito)
+            resultado.append(Resultado(provas[i].codigo, nota_final))
 
     return ordenar_lista(resultado)
 
@@ -159,30 +129,85 @@ def maior_resultado(resultados: list[Resultado]) -> Resultado:
 
     return maior_resultado
 
-def ordenar_lista(resultados: list[Resultado]) -> list[Resultado]:
+def ordenar_lista(resultados: list[Resultado], provas: list[Prova]) -> list[Resultado]:
     '''
     Retorna uma lista de resultado ordenada pelo maior valor das notas finais
     Exemplo:
     >>> ordenar_lista([Resultado(codigo='3211', nota_final=97.0), Resultado(codigo='1234', nota_final=109.5), Resultado(codigo='5812', nota_final=49.5)])  
     [Resultado(codigo='1234', nota_final=109.5), Resultado(codigo='3211', nota_final=97.0), Resultado(codigo='5812', nota_final=49.5)]
     '''
-    resultado_ordenado: list = []
+    resultado_ordenado: list[Resultado] = []
+    
     for i in range(len(resultados)):
         maior: Resultado = maior_resultado(resultados)
 
         resultado_ordenado.append(maior)
-        resultados.remove(maior)
+        resultados = remover(resultados, maior)
 
     return resultado_ordenado
 
+def remover(lista: list, elem) -> list:
+    '''
+    Retorna a lista sem o elemento dado como parametro.
+    Exemplo:
+    >>> remover(["laranja","maça","banana","laranja","beterraba"], "laranja")
+    ['maça', 'banana', 'beterraba']
+    '''
+    nova_lista: list = []
+    for i in range(len(lista)):
+        if lista[i] != elem:
+            nova_lista.append(lista[i])
+    return nova_lista
+
+def converte_string(respostas: list[str]) -> list[int]:
+    '''
+    >>> converte_string(['04', '08', '16', '10', '8'])
+    [4, 8, 16, 10, 8]
+    '''
+    nv_lst = []
+    for i in range(len(respostas)):
+        if respostas[i][0] == 0:
+            nv_lst.append(int(respostas[i][1:]))
+        else:
+            nv_lst.append(int(respostas[i]))
+
+    return nv_lst
+
 def main():
+    """  
     provas = [Prova(3211, 80.0, [4, 10, 4, 16, 10]), Prova(7102, 0, [1, 2, 3, 4, 5]), 
     Prova(1234, 90.0, [21, 8, 8, 8, 14]), Prova(5812, 32.0, [20, 0, 8, 16, 1]), Prova(9123, 0, [5, 4, 3, 2, 1])]
     gabarito = [21, 10, 8, 16, 15]
-    
-    resultados = resultado(provas,gabarito)
+    """
 
-    print('O resultado do vestibular foi:')
+    provas: list[Prova] = []
+    gabarito: list[int] = []
+    n_respostas: int = int(input("Digite o numero de questões: "))
+    n_provas: int = int(input("Quantas provas deseja checar? "))
+
+    for i in range(1, n_provas+1):
+        print(f"{i}° Prova ")
+        respostas: list[str] = []
+        codigo = input("Digite o seu código: ")
+        redacao = float(input("Digite o valor da redação: "))
+        
+        print(f"Digite as somatórias das suas respostas: ")
+        for i in range(1, n_respostas+1):
+            questao: str = input(f"Resposta - Questão {i}: ")
+            respostas.append(questao)
+
+        prova = Prova(codigo,redacao, converte_string(respostas))
+        provas.append(prova)
+        print("\n")
+
+    print("Agora digite o gabarito das questões somatorias: \n")
+    for i in range(1, n_respostas+1):
+        questao: str = input(f"Gabarito - Questão {i}: ")
+        gabarito.append(questao)
+    
+    resultados = resultado(provas, converte_string(gabarito))
+    print(resultados)
+    print('O resultado do vestibular foi: \n')
     for i in range(len(resultados)):
         print(f"{i+1} lugar: Código: {resultados[i].codigo}, Nota: {resultados[i].nota_final}")
 

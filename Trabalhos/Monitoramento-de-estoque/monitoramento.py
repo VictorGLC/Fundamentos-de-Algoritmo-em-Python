@@ -22,17 +22,17 @@ class Totalizacao:
     Vai pegar a lista dos produtos do pedido e vai totalizar as quantidades dos produtos
     (bobina, chapa e painel) nesta classe.
     '''
-    nome: list
-    quantidade: list
+    nome: list[str]
+    quantidade: list[int]
 
-def ordem_alfabetica_nomes_produto(lista: list[Pedido]) -> list:
+def ordem_alfabetica_nomes_produto(lista: list[Pedido]) -> list[str]:
     '''
     Recebe uma lista de pedidos e retorna uma lista com o nome desses pedidos de forma ordenada alfabeticamente.
     Exemplos:
     >>> ordem_alfabetica_nomes_produto([Pedido('Bobina',100,60.0),Pedido('Chapa',50,48.0),Pedido('Bobina',30,60.0),Pedido('Painel',20,90.0),Pedido('Chapa',15,48.0),Pedido('Bobina',17,60.0)])
     ['Bobina', 'Chapa', 'Painel']
     '''
-    lista_alfabetica = []
+    lista_alfabetica: list = []
     
     for i in range(len(lista)):
         if not lista[i].nome in lista_alfabetica:
@@ -60,9 +60,8 @@ def totaliza_pedidos(pedidos: list[Pedido]) -> Totalizacao:
             if nome_pedidos[i] == pedidos[j].nome:
                 soma_pedidos = soma_pedidos + pedidos[j].quantidade
         quantidade_pedidos.append(soma_pedidos)
-        soma_pedidos=0
+        soma_pedidos = 0
     
-
     totalizacao: Totalizacao = Totalizacao(nome_pedidos, quantidade_pedidos)
     return totalizacao
 
@@ -140,7 +139,7 @@ def calcular_desconto(pedido: Pedido) -> float:
     elif pedido.quantidade >= 500:
         desconto = 0.02
     else:
-        return valor_total
+        desconto = 1
 
     return valor_total - (valor_total * desconto)
 
@@ -158,31 +157,6 @@ def calcular_lucro_bruto(notas_de_venda: list[NotasDeVenda]) -> float:
         else:
             lucro = lucro + (notas_de_venda[i].pedido.quantidade * notas_de_venda[i].pedido.valor)
     
-    return lucro
-
-def calcular_lucro_liquido_total(notas_de_venda: list[NotasDeVenda]) -> float:
-    '''
-    Recebe *notas_de_venda* e calcula o lucro liquido de todas as notas de venda/pedidos.
-    Exemplo:
-    >>> calcular_lucro_liquido_total([NotasDeVenda(Vendedor('roberto',5000.0),Pedido('Bobina',600,60.0),True), NotasDeVenda(Vendedor('José',10000.0), Pedido('Chapa',1000,48.0), False), NotasDeVenda(Vendedor('Fabio',8000.0), Pedido('Painel',3000, 90.0), True)])
-    57530.0
-    '''
-    lucro: float = 0.
-    for i in range(len(notas_de_venda)):
-        if notas_de_venda[i].pedido.nome.lower() == 'bobina':
-            notas_de_venda[i].pedido.valor = 10
-        elif notas_de_venda[i].pedido.nome.lower() == 'chapa':
-            notas_de_venda[i].pedido.valor = 8
-        elif notas_de_venda[i].pedido.nome.lower() == 'painel':
-            notas_de_venda[i].pedido.valor = 15
-        else:
-            return notas_de_venda[i].pedido.valor
-            
-        if notas_de_venda[i].dar_desconto:
-            lucro = lucro + calcular_desconto(notas_de_venda[i].pedido)
-        else: 
-            lucro = lucro + (notas_de_venda[i].pedido.quantidade * notas_de_venda[i].pedido.valor)
-
     return lucro
 
 def calcular_lucro_liquido_pedidos(notas_de_venda: NotasDeVenda) -> float:
@@ -208,6 +182,19 @@ def calcular_lucro_liquido_pedidos(notas_de_venda: NotasDeVenda) -> float:
         lucro = lucro + (notas_de_venda.pedido.quantidade * notas_de_venda.pedido.valor)
 
     return lucro
+
+def calcular_lucro_liquido_total(notas_de_venda: list[NotasDeVenda]) -> float:
+    '''
+    Recebe *notas_de_venda* e calcula o lucro liquido de todas as notas de venda/pedidos.
+    Exemplo:
+    >>> calcular_lucro_liquido_total([NotasDeVenda(Vendedor('roberto',5000.0),Pedido('Bobina',600,60.0),True), NotasDeVenda(Vendedor('José',10000.0), Pedido('Chapa',1000,48.0), False), NotasDeVenda(Vendedor('Fabio',8000.0), Pedido('Painel',3000, 90.0), True)])
+    57530.0
+    '''
+    lucro: float = 0
+    for i in range(len(notas_de_venda)):
+       lucro = lucro + calcular_lucro_liquido_pedidos(notas_de_venda[i])
+
+    return lucro
     
 def receita_mensal(notas_de_venda: list[NotasDeVenda]) -> Receita:
     '''
@@ -226,11 +213,11 @@ def receita_mensal(notas_de_venda: list[NotasDeVenda]) -> Receita:
 
     # percorre todas as notas de venda e verifica os pedidos, com base no nome do pedido é calculado o lucro liquido do produto
     for i in range(len(notas_de_venda)):
-        if notas_de_venda[i].pedido.nome.lower() == 'bobina':
+        if notas_de_venda[i].pedido.nome.upper() == TipoProduto.BOBINA.name:
             receita.lucro_bobinas = receita.lucro_bobinas + calcular_lucro_liquido_pedidos(notas_de_venda[i])
-        elif notas_de_venda[i].pedido.nome.lower() == 'chapa':
+        elif notas_de_venda[i].pedido.nome.upper() == TipoProduto.CHAPA.name:
             receita.lucro_chapas = receita.lucro_chapas + calcular_lucro_liquido_pedidos(notas_de_venda[i])
-        elif notas_de_venda[i].pedido.nome.lower() == 'painel':
+        elif notas_de_venda[i].pedido.nome.upper() == TipoProduto.PAINEL.name:
             receita.lucro_paineis = receita.lucro_paineis + calcular_lucro_liquido_pedidos(notas_de_venda[i])
         else:
             return
@@ -254,12 +241,10 @@ def vendedor_maior_lucro(vendedores: list[Vendedor]) -> Vendedor:
     >>> vendedor_maior_lucro([Vendedor('Alfredo',4000.0),Vendedor('José',7000.0),Vendedor('Bernardo',10000.0), Vendedor('Victor',12000.0), Vendedor('Godofredo',5000.0)])
     Vendedor(nome='Victor', lucro=12000.0)
     '''
-    maior: float = vendedores[0].lucro
     maior_vendedor: Vendedor = vendedores[0]
 
     for i in range(len(vendedores)):
-        if vendedores[i].lucro > maior:
-            maior = vendedores[i].lucro
+        if vendedores[i].lucro > maior_vendedor.lucro:
             maior_vendedor = vendedores[i]
 
     return maior_vendedor

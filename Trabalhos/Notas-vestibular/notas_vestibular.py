@@ -4,8 +4,8 @@ from dataclasses import dataclass
 class Prova:
     codigo: str
     redacao: float
-    respostas: list[int]
-
+    respostas: list[str]
+    
 @dataclass
 class Resultado:
     codigo: str
@@ -98,17 +98,30 @@ def soma_recursiva(alternativas: list[int]) -> float:
     else:
         return alternativas[0] + soma_recursiva(alternativas[1:])
 
-def resultado(provas: list[Prova], gabarito: list) -> list[Resultado]:
+def converte_string(somatorias: list[str]) -> list[int]:
+    '''
+    Modifica uma lista de strings convertendo para uma lista de inteiros e removendo o 0 em unidades
+    como 04, 08, 06, etc.
+    '''
+    for i in range(len(somatorias)):
+        if somatorias[i][0] == 0:
+            somatorias[i] = int(somatorias[i][1:])
+        else:
+            somatorias[i] = int(somatorias[i])
+
+def resultado(provas: list[Prova], gabarito: list[str]) -> list[Resultado]:
     '''
     Retorna o resultado final das provas.
     Exemplo:
-    >>> resultado([Prova('3211', 80.0, [4, 10, 4, 16, 10]), Prova('7102', 0, [1, 2, 3, 4, 5]), Prova('1234', 90.0, [21, 8, 8, 8, 14]), Prova('5812', 32.0, [20, 0, 8, 16, 1]), Prova('9123', 0, [5, 4, 3, 2, 1])], [21, 10, 8, 16, 15])
+    >>> resultado([Prova('3211', 80.0, ['04', '10', '04', '16', '10']), Prova('7102', 0, ['01', '02', '03', '04', '05']), Prova('1234', 90.0, ['21', '08', '08', '08', '14']), Prova('5812', 32.0, ['20', '0', '08', '16', '01']), Prova('9123', 0, ['05', '04', '03', '02', '01'])], ['21', '10', '08', '16', '15'])
     [Resultado(codigo='1234', nota_final=109.5), Resultado(codigo='3211', nota_final=97.0), Resultado(codigo='5812', nota_final=49.5)]
     '''
     resultado: list = []
+    converte_string(gabarito)
 
     for i in range(len(provas)):
         if len(provas[i].respostas) == len(gabarito) and provas[i].redacao > 0:
+            converte_string(provas[i].respostas)
             nota_final: float = provas[i].redacao + calcula_respostas(provas[i].respostas, gabarito)
             resultado.append(Resultado(provas[i].codigo, nota_final))
 
@@ -159,24 +172,7 @@ def remover(lista: list, elem) -> list:
             nova_lista.append(lista[i])
     return nova_lista
 
-def converte_string(respostas: list[str]) -> list[int]:
-    '''
-    Modifica uma lista de string por uma lista de inteiros que remove o 0 em unidades
-    como 04, 08, 06, etc.
-    '''
-    for i in range(len(respostas)):
-        if respostas[i][0] == 0:
-            respostas[i] = int(respostas[i][1:])
-        else:
-            respostas[i] = int(respostas[i])
-
 def main():
-    """
-    provas = [Prova(3211, 80.0, [4, 10, 4, 16, 10]), Prova(7102, 0, [1, 2, 3, 4, 5]), 
-    Prova(1234, 90.0, [21, 8, 8, 8, 14]), Prova(5812, 32.0, [20, 0, 8, 16, 1]), Prova(9123, 0, [5, 4, 3, 2, 1])]
-    gabarito = [21, 10, 8, 16, 15]
-    """
-
     provas: list[Prova] = []
     gabarito: list[int] = []
     n_respostas: int = int(input("Digite o numero de questões: "))
@@ -189,23 +185,21 @@ def main():
         redacao = float(input("Digite o valor da redação: "))
         
         print(f"Digite as somatórias das suas respostas: ")
-        for i in range(1, n_respostas+1):
-            questao: str = input(f"Resposta - Questão {i}: ")
+        for j in range(1, n_respostas+1):
+            questao: str = input(f"Resposta - Questão {j}: ")
             respostas.append(questao)
 
-        converte_string(respostas)
         prova = Prova(codigo,redacao, respostas)
         provas.append(prova)
         print("\n")
 
     print("Agora digite o gabarito das questões somatorias: \n")
-    for i in range(1, n_respostas+1):
-        questao: str = input(f"Gabarito - Questão {i}: ")
+    for k in range(1, n_respostas+1):
+        questao: str = input(f"Gabarito - Questão {k}: ")
         gabarito.append(questao)
-    
-    converte_string(gabarito)
+
     resultados = resultado(provas, gabarito)
-    print('O resultado do vestibular foi: \n')
+    print('\nO resultado do vestibular foi: \n')
     for i in range(len(resultados)):
         print(f"{i+1} lugar: Código: {resultados[i].codigo}, Nota: {resultados[i].nota_final}")
 

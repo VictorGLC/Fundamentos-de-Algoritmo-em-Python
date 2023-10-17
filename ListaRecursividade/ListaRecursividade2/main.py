@@ -70,7 +70,7 @@ def verifica_binario(lista: list) -> bool:
     >>> verifica_binario([2,1,1,1,0,0,1,0])
     False
     '''
-    if len(lista) <= 1:
+    if len(lista) == 1:
         return True
     else:
         if lista[0] == 1 or lista[0] == 0:
@@ -114,7 +114,7 @@ def verifica_pares(lista: list) -> bool:
     >>> verifica_pares([20,30,50,25,40])
     False
     '''
-    if len(lista) <= 1:
+    if len(lista) == 0:
         return True
     else:
         if lista[0] % 2 == 0:

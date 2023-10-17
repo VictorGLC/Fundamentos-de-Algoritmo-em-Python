@@ -7,7 +7,7 @@ def somar_numeros(n: int) -> int:
     >>> somar_numeros(2)
     3
     '''
-    if n <= 1:
+    if n == 0:
         return n 
     else:
         return (somar_numeros(n-1)) + n
